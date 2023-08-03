@@ -1,0 +1,10 @@
+{
+    "session": {
+        "XSRF-TOKEN": "FILL-HERE",
+        "sccauth": "FILL-HERE"
+    },
+    "tenant": {
+        "id": "FILL-HERE"
+    },
+    "step": 0
+}
