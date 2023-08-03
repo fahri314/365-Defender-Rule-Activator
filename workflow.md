@@ -120,7 +120,6 @@ Request Method  : GET
 
 ```text
 Response:
-
 {
     "Id": 23,
     "OrgId": "df803bf6-690e-4442-a529-9fa711b6a2e8",
@@ -195,5 +194,6 @@ Request Method  : PATCH
 ```
 
 ```text
+Patch Data       :
 {"RuleIds":[24],"IsEnabled":true}
 ```
