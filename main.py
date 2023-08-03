@@ -9,6 +9,12 @@ class activator:
         with open("config.json", "r") as config:
             self.auth = json.loads(config.read())
             self.auth['session']['XSRF-TOKEN'] = self.auth['session']['XSRF-TOKEN'].replace('%3A', ":")
+        self.edit_list = []
+        self.activated = 0
+        self.passed = 0
+        self.i = 0
+        self.start_time = datetime.now()
+        self.step = self.auth['step']
 
     def get_queries(self):
         endpoint_uri = 'https://security.microsoft.com/apiproxy/mtp/huntingService/queries/?type=scheduled'
@@ -100,26 +106,30 @@ class activator:
             print("[!] Error at `enable_rule` function")
             exit()
 
+    def print_results(self):
+        print(f"\x1b[1;31;43m[++++++++++] Edit List [++++++++++]\x1b[0;0m")
+        print(*self.edit_list, sep = "\n")
+        print(f"\x1b[1;31;43m[++++++++++] Activated Rules Count [++++++++++]\x1b[0;0m")
+        print(self.activated)
+        print(f"\x1b[1;31;43m[++++++++++] Passed Rules Count [++++++++++]\x1b[0;0m")
+        print(self.passed)
+        end_time = datetime.now()
+        print("\n\n\x1b[1;31;43m[!]\x1b[0;0mElapsed time: ", end_time - self.start_time)
+
 
 
 if __name__ == '__main__':
-    edit_list = []
-    activated = 0
-    passed = 0
-    i = 0
-    start_time = datetime.now()
     activator = activator()
-    step = activator.auth['step']
     queries = activator.get_queries()
     print(f"\x1b[1;31;43m[+] Fetched ({len(queries)}) queries\x1b[0;0m\n")
 
     try:
         for query in queries:
-            if i < step:
-                i += 1
+            if activator.i < activator.step:
+                activator.i += 1
                 continue
-            i += 1
-            print(f"\x1b[1;31;43m[+] Query Name: '{query['Name']} || Query ID: ({query['Id']})' Step: ({i})\x1b[0;0m")
+            activator.i += 1
+            print(f"\x1b[1;31;43m[+] Query Name: '{query['Name']} || Query ID: ({query['Id']})' Step: ({activator.i})\x1b[0;0m")
             print("[!] Reading rule informations")
 
             rule_info = activator.get_rule_info(query['Id'])
@@ -135,24 +145,19 @@ if __name__ == '__main__':
                     # Enable Rule
                     print("[!] Rule enabling")
                     activator.enable_rule(rule_info["Id"])
-                    activated += 1
+                    activator.activated += 1
                 else:
                     # Append to edit list
                     print("[!] Rule appended to edit list")
-                    edit_list.append(rule_info["Name"])
+                    activator.edit_list.append(rule_info["Name"])
                     with open("edit_list", "a") as f:
                         f.write(rule_info["Name"] + "\n")
             else:
                 print(f"[!] Query ID: {query['Id']} passed!")
-                passed += 1
+                activator.passed += 1
                 continue
 
+        activator.print_results()
+
     except KeyboardInterrupt:
-        print(f"\x1b[1;31;43m[++++++++++] Edit List [++++++++++]\x1b[0;0m")
-        print(*edit_list, sep = "\n")
-        print(f"\x1b[1;31;43m[++++++++++] Activated Rules Count [++++++++++]\x1b[0;0m")
-        print(activated)
-        print(f"\x1b[1;31;43m[++++++++++] Passed Rules Count [++++++++++]\x1b[0;0m")
-        print(passed)
-        end_time = datetime.now()
-        print("\n\n\x1b[1;31;43m[!]\x1b[0;0mElapsed time: ", end_time - start_time)
+        activator.print_results()
