@@ -65,6 +65,10 @@ class activator:
             sleep(30)
             print("[!] Retrying ...")
             return self.run_query(post_data)
+        if response.status_code == 400:
+            print("[-] status_code: 400 | reason: '%s'" %(response.text))
+            print("[!] The rule may be wrong. You can increase the number of steps in the config file and pass the wrong rule.")
+            exit()
         response = json.loads(response.text)
         return response
     
